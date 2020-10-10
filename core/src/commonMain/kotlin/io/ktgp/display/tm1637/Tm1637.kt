@@ -62,7 +62,8 @@ public class Tm1637(private val config: Config, gpio: Gpio) : Closeable {
   }
 
   public fun displayString(s: String, colon: Boolean = false, position: UByte = 0U) {
-    val segments = encodeString(s)
+    val length = min(s.length, (config.segments - position.toInt()))
+    val segments = encodeString(s, length)
     if (segments.size > 1 && colon) {
       segments[1] = segments[1] or 0x80U
     }
@@ -132,10 +133,8 @@ public class Tm1637(private val config: Config, gpio: Gpio) : Closeable {
     }
   }
 
-  private fun encodeString(s: String): UByteArray {
-    return UByteArray(min(s.length, config.segments)) {
-      encodeChar(s[it])
-    }
+  private fun encodeString(s: String, length: Int) = UByteArray(length) {
+    encodeChar(s[it])
   }
 
   private fun writeByte(byte: UByte) {
