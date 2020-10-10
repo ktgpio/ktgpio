@@ -44,6 +44,11 @@ class DigitalTube : Sample {
         display.on = true
         display.displayTemperature(24)
         sleep(1000)
+
+        repeat(5) {
+          display.ticker("Hello World", config.segments, 200)
+        }
+
         for (i in 7 downTo 0) {
           display.brightness = i.toUByte()
           sleep(500)
@@ -53,4 +58,20 @@ class DigitalTube : Sample {
   }
 
   private fun Int.toPaddedString() = toString(10).padStart(2, '0')
+
+  private fun Tm1637.ticker(text: String, segments: Int, delay: Long) {
+    val s = buildString {
+      repeat(segments - 1) {
+        append(' ')
+      }
+      append(text)
+      repeat(segments) {
+        append(' ')
+      }
+    }
+    for (i in 0..s.length - segments) {
+      displayString(s.substring(i, i + segments))
+      sleep(delay)
+    }
+  }
 }
