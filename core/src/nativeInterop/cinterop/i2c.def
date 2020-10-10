@@ -1,0 +1,4 @@
+headers = i2c/smbus.h linux/i2c-dev.h
+package = io.ktgp.i2c.native
+compilerOpts = -Iheaders/include/ -Iheaders/linux-headers-5.4.51-v8+/uapi/
+linkerOpts = -Llib/aarch64-linux-gnu/ -li2c

@@ -1,0 +1,9 @@
+headers = linux/spi/spidev.h
+package = io.ktgp.spi.native
+compilerOpts = -Iheaders/linux-headers-5.4.51-v8+/uapi/
+
+---
+
+static inline __u64 spiIocMessage(int arg) {
+    return SPI_IOC_MESSAGE(arg);
+}

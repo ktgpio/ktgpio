@@ -1,0 +1,4 @@
+headers = gpiod.h
+package = io.ktgp.gpio.native
+compilerOpts = -Iheaders/include/
+linkerOpts = -Llib/aarch64-linux-gnu/ -lgpiod
