@@ -29,10 +29,16 @@ repositories {
   mavenCentral()
 }
 
+val ideaActive = rootProject.ext["ideaActive"] == true
+
 kotlin {
   explicitApi()
 
-  val linuxArm64 = linuxArm64()
+  val targets = if (ideaActive) {
+    listOf(linuxArm64("posix"))
+  } else {
+    listOf(linuxArm32Hfp(), linuxArm64())
+  }
 
   sourceSets.all {
     languageSettings.useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
@@ -45,7 +51,26 @@ kotlin {
       }
     }
 
-    configure(listOf(linuxArm64)) {
+    if (!ideaActive) {
+      val posixMain by creating {
+        dependsOn(commonMain)
+      }
+      val linuxArm64Main by getting {
+        dependsOn(posixMain)
+      }
+      val linuxArm32HfpMain by getting {
+        dependsOn(posixMain)
+      }
+    } else {
+      val linuxArm64Main by creating {
+        dependsOn(commonMain)
+      }
+      val posixMain by getting {
+        dependsOn(linuxArm64Main)
+      }
+    }
+
+    configure(targets) {
       compilations["main"].apply {
         cinterops.create("gpiod") {
           includeDirs("src/nativeInterop/cinterop/headers/include/")
@@ -59,7 +84,7 @@ kotlin {
 
         cinterops.create("spi") {
           includeDirs(
-            "src/nativeInterop/cinterop/headers/linux-headers-5.4.51-v8+/uapi/"
+            "src/nativeInterop/cinterop/headers/linux-headers-5.4.51/uapi/"
           )
         }
       }

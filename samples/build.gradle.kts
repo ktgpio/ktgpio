@@ -29,8 +29,14 @@ repositories {
   mavenCentral()
 }
 
+val ideaActive = rootProject.ext["ideaActive"] == true
+
 kotlin {
-  val linuxArm64 = linuxArm64()
+  val targets = if (ideaActive) {
+    listOf(linuxArm64())
+  } else {
+    listOf(linuxArm32Hfp(), linuxArm64())
+  }
 
   sourceSets.all {
     dependencies {
@@ -42,7 +48,7 @@ kotlin {
     languageSettings.useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
   }
 
-  configure(listOf(linuxArm64)) {
+  configure(targets) {
     binaries.executable()
   }
 

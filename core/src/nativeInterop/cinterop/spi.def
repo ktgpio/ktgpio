@@ -1,6 +1,6 @@
 headers = linux/spi/spidev.h
 package = io.ktgp.spi.native
-compilerOpts = -Iheaders/linux-headers-5.4.51-v8+/uapi/
+compilerOpts = -Iheaders/linux-headers-5.4.51/uapi/
 
 ---
 

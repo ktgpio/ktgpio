@@ -38,13 +38,14 @@ public actual fun println(message: Any?) {
 
 public actual fun sleep(sec: Long, nanos: Long) {
   val spec = cValue<timespec> {
-    tv_sec = sec
-    tv_nsec = nanos
+    tv_sec = sec.toTimeT()
+    tv_nsec = nanos.toTimeT()
   }
   nanosleep(spec, null)
 }
 
-public actual fun nanotime(): Long = getTimeNanos()
+@Suppress("RemoveRedundantCallsOfConversionMethods")
+public actual fun nanotime(): Long = getTimeNanos().toLong()
 
 public actual fun readFile(path: String): ByteArray {
   val f = fopen(path, "rb")
@@ -55,7 +56,7 @@ public actual fun readFile(path: String): ByteArray {
 
     return memScoped {
       val buff = allocArray<ByteVar>(size)
-      fread(buff, 1, size.toULong(), f)
+      fread(buff, 1, size.toSizeT(), f)
       buff.readBytes(size.toInt())
     }
   } finally {
@@ -70,3 +71,10 @@ public actual fun readLine(): String? {
 public actual fun Gpio(n: Int, consumer: String): Gpio = Gpiod(n, consumer)
 public actual fun Spi(device: String): Spi = SpiImpl(device)
 public actual fun I2c(n: Int): I2c = SMBus(n)
+
+public expect fun UInt.toSizeT(): size_t
+public expect fun Long.toSizeT(): size_t
+public expect fun Int.toSizeT(): size_t
+public expect fun <T> ULong.toIoctlRequest(): T
+
+public expect fun Long.toTimeT(): time_t

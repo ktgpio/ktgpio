@@ -89,7 +89,8 @@ internal class Gpiod(n: Int, private val consumer: String) : Gpio {
               else -> error("Unexpected event on GPIO line $pin")
             }
 
-            Event(type, ts.tv_sec, ts.tv_nsec)
+            @Suppress("RemoveRedundantCallsOfConversionMethods")
+            Event(type, ts.tv_sec.toLong(), ts.tv_nsec.toLong())
           }
 
           if (!accept(eventKt)) {

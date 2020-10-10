@@ -20,24 +20,16 @@
  * SOFTWARE.
  */
 
-group = "io.ktgp"
-version = "1.0"
+@file:Suppress("UNCHECKED_CAST")
 
-ext {
-  set("ideaActive", System.getProperty("idea.active") != null)
-}
+package io.ktgp
 
-plugins {
-  kotlin("multiplatform") version "1.4.10" apply false
-}
+import platform.posix.size_t
+import platform.posix.time_t
 
-buildscript {
-  dependencies {
-    classpath("org.jmailen.gradle:kotlinter-gradle:3.2.0")
-  }
-}
+public actual fun UInt.toSizeT(): size_t = this
+public actual fun Long.toSizeT(): size_t = toUInt()
+public actual fun Int.toSizeT(): size_t = toUInt()
+public actual fun <T> ULong.toIoctlRequest(): T = toUInt() as T
 
-subprojects {
-  group = "io.ktgp"
-  version = "1.0"
-}
+public actual fun Long.toTimeT(): time_t = toInt()

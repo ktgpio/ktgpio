@@ -23,6 +23,8 @@
 package io.ktgp.spi
 
 import io.ktgp.spi.native.*
+import io.ktgp.toIoctlRequest
+import io.ktgp.toSizeT
 import kotlinx.cinterop.*
 import platform.posix.*
 import kotlin.math.min
@@ -93,7 +95,7 @@ internal class SpiImpl(device: String) : Spi {
         bits_per_word = settings.bitsPerWord
       }
 
-      ioctl(file, spiIocMessage(1), spiTransfer)
+      ioctl(file, spiIocMessage(1).toIoctlRequest(), spiTransfer)
     }
 
     if (res < 0) {
@@ -116,9 +118,9 @@ internal class SpiImpl(device: String) : Spi {
             length - blockStart
           } else {
             bufSize
-          }
+          }.toUInt()
 
-          memcpy(txBuf, pinned.addressOf(blockStart), blockSize.toULong())
+          memcpy(txBuf, pinned.addressOf(blockStart), blockSize.toSizeT())
 
           spiTransfer.apply {
             tx_buf = txBuf.toLong().toULong()
@@ -129,13 +131,13 @@ internal class SpiImpl(device: String) : Spi {
             bits_per_word = settings.bitsPerWord
           }
 
-          val res = ioctl(file, spiIocMessage(1), spiTransfer)
+          val res = ioctl(file, spiIocMessage(1).toIoctlRequest(), spiTransfer)
 
           if (res < 0) {
             error("SPI transaction failed: $res")
           }
 
-          blockStart += blockSize
+          blockStart += blockSize.toInt()
         }
       }
 
