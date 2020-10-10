@@ -31,14 +31,14 @@ fun main() {
 
 private fun getSample(): Sample {
   val samples = arrayOf(
-    Adc(),
     Blink(),
-    Dht(),
-    Display(),
-    Lcd(),
     Distance(),
+    Dht(),
     I2c(),
+    Adc(),
+    Lcd(),
     DigitalTube(),
+    Display(),
   )
 
   do {
