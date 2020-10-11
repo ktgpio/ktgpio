@@ -125,7 +125,7 @@ internal class SpiImpl(device: String) : Spi {
           spiTransfer.apply {
             tx_buf = txBuf.toLong().toULong()
             rx_buf = rxBuf.toLong().toULong()
-            len = blockSize.toUInt()
+            len = blockSize
             delay_usecs = 0U
             speed_hz = settings.speedHz
             bits_per_word = settings.bitsPerWord
@@ -154,34 +154,29 @@ internal class SpiImpl(device: String) : Spi {
   override fun getBlockSize(): Int = blockSize
 
   override fun setMode(mode: UByte) {
-    val tmp = this.mode and (SPI_CPHA or SPI_CPOL).inv().toUByte() or mode
-    if (doSetMode(tmp)) {
-      this.mode = tmp
-    }
+    doSetMode(this.mode and (SPI_CPHA or SPI_CPOL).inv().toUByte() or mode)
   }
 
   override fun getMode(): UByte {
-    return mode
+    return mode and (SPI_CPHA or SPI_CPOL).toUByte()
   }
 
   override fun setLsbFirst(value: Boolean) {
     val tmp = if (value) {
-      this.mode.toInt() or SPI_LSB_FIRST
+      this.mode or SPI_LSB_FIRST.toUByte()
     } else {
-      this.mode.toInt() and SPI_LSB_FIRST.inv()
-    }.toUByte()
-
-    if (doSetMode(tmp)) {
-      this.mode = tmp
+      this.mode and SPI_LSB_FIRST.toUByte().inv()
     }
+
+    doSetMode(tmp)
   }
 
   override fun close() {
     close(file)
   }
 
-  private fun doSetMode(mode: UByte): Boolean {
-    return memScoped {
+  private fun doSetMode(mode: UByte) {
+    memScoped {
       val modeVar = alloc<UByteVar> {
         value = mode
       }
@@ -194,8 +189,12 @@ internal class SpiImpl(device: String) : Spi {
         error("Can not get SPI_IOC_RD_MODE from SPI device")
       }
 
-      modeVar.value != mode
+      if (modeVar.value != mode) {
+        error("Failed to set SPI mode")
+      }
     }
+
+    this.mode = mode
   }
 
   private companion object {
