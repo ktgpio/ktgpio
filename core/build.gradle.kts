@@ -77,15 +77,11 @@ kotlin {
         }
 
         cinterops.create("i2c") {
-          includeDirs(
-            "src/nativeInterop/cinterop/headers/include/"
-          )
+          includeDirs("src/nativeInterop/cinterop/headers/include/")
         }
 
         cinterops.create("spi") {
-          includeDirs(
-            "src/nativeInterop/cinterop/headers/linux-headers-5.4.51/uapi/"
-          )
+          includeDirs("src/nativeInterop/cinterop/headers/include/")
         }
       }
     }

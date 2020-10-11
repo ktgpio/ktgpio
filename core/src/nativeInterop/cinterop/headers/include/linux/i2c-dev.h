@@ -21,11 +21,11 @@
     MA 02110-1301 USA.
 */
 
-#ifndef _UAPI_LINUX_I2C_DEV_H
-#define _UAPI_LINUX_I2C_DEV_H
+#ifndef _LINUX_I2C_DEV_H
+#define _LINUX_I2C_DEV_H
 
 #include <linux/types.h>
-#include <linux/compiler.h>
+
 
 /* /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
  * unsigned long, except for:
@@ -58,12 +58,12 @@ struct i2c_smbus_ioctl_data {
 	__u8 read_write;
 	__u8 command;
 	__u32 size;
-	union i2c_smbus_data __user *data;
+	union i2c_smbus_data *data;
 };
 
 /* This is the structure as used in the I2C_RDWR ioctl call */
 struct i2c_rdwr_ioctl_data {
-	struct i2c_msg __user *msgs;	/* pointers to i2c_msgs */
+	struct i2c_msg *msgs;	/* pointers to i2c_msgs */
 	__u32 nmsgs;			/* number of i2c_msgs */
 };
 
@@ -72,4 +72,4 @@ struct i2c_rdwr_ioctl_data {
 #define  I2C_RDRW_IOCTL_MAX_MSGS	I2C_RDWR_IOCTL_MAX_MSGS
 
 
-#endif /* _UAPI_LINUX_I2C_DEV_H */
+#endif /* _LINUX_I2C_DEV_H */
