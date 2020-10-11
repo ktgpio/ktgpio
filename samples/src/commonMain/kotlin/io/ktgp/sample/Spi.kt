@@ -20,36 +20,45 @@
  * SOFTWARE.
  */
 
-import io.ktgp.readLine
-import io.ktgp.sample.*
+package io.ktgp.sample
 
-fun main() {
-  val sample = getSample()
-  println("Running $sample...")
-  sample.run()
-}
+import io.ktgp.Spi
+import io.ktgp.spi.Spi
+import io.ktgp.use
 
-private fun getSample(): Sample {
-  val samples = arrayOf(
-    Blink(),
-    Distance(),
-    Dht(),
-    I2c(),
-    Spi(),
-    Adc(),
-    Lcd(),
-    DigitalTube(),
-    Display(),
-  )
+class Spi : Sample {
+  override fun run() {
+    Spi("0.0").use { spi ->
+      val testSpeed = 500000U
+      val testMode: UByte = 0x02U
 
-  do {
-    samples.forEachIndexed { index, sample ->
-      println("$index:   $sample")
+      val initialSpeed = spi.maxSpeed
+      dump(spi)
+      println("\nSetting speed to $testSpeed...")
+      spi.maxSpeed = testSpeed
+      dump(spi)
+      println("\nSetting speed to initial value")
+      spi.maxSpeed = initialSpeed
+      dump(spi)
+
+      val initialMode = spi.getMode()
+      println("\nSetting mode to $testMode...")
+      spi.setMode(testMode)
+      dump(spi)
+      println("\nSetting mode to initial value")
+      spi.setMode(initialMode)
+      dump(spi)
     }
+  }
 
-    val read = readLine()?.toIntOrNull()
-    if (read != null && read >= 0 && read < samples.size) {
-      return samples[read]
-    }
-  } while (true)
+  private fun dump(spi: Spi) {
+    println(
+      """
+        bitsPerWord:    ${spi.getBitsPerWord()}
+        block size:     ${spi.getBlockSize()}
+        mode:           ${spi.getMode()}
+        max speed:      ${spi.maxSpeed} Hz
+      """.trimIndent()
+    )
+  }
 }

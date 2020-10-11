@@ -32,6 +32,7 @@ public interface Spi : Closeable {
   public fun setMode(mode: UByte)
   public fun getMode(): UByte
   public fun setLsbFirst(value: Boolean)
+  public var maxSpeed: UInt
 
   public data class Settings(val bitsPerWord: UByte, val speedHz: UInt)
 }

@@ -31,10 +31,30 @@ import kotlin.math.min
 
 internal class SpiImpl(device: String) : Spi {
 
-  private var mode: UByte = 0U
+  private var mode: UByte
   private val file: Int = open("/dev/spidev$device", O_RDWR, 0)
   private val bitsPerWord: UByte
   private val blockSize: Int
+
+  override var maxSpeed: UInt
+    get() = memScoped {
+      val mode = alloc<UIntVar>()
+      if (ioctl(file, SPI_IOC_RD_MAX_SPEED_HZ, mode.ptr) == -1) {
+        error("Can not get SPI_IOC_RD_MAX_SPEED_HZ from SPI device")
+      }
+
+      mode.value
+    }
+    set(value) {
+      memScoped {
+        val mode = alloc<UIntVar> {
+          this.value = value
+        }
+        if (ioctl(file, SPI_IOC_WR_MAX_SPEED_HZ, mode.ptr) == -1) {
+          error("Can not set SPI_IOC_WR_MAX_SPEED_HZ")
+        }
+      }
+    }
 
   init {
     if (file < 0) {

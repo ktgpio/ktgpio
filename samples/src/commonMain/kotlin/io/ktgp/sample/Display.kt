@@ -44,14 +44,6 @@ class Display : Sample {
     Spi("0.0").use { spi ->
       spi.setMode(0U)
       spi.setLsbFirst(false)
-      println(
-        """
-          spi bitsPerWord:    ${spi.getBitsPerWord()};
-          spi block size:     ${spi.getBlockSize()}
-          spi mode:           ${spi.getMode()}
-        """.trimIndent()
-      )
-
       Gpio().use { gpio ->
         St7735(config, gpio, spi).use(::test)
       }
@@ -61,9 +53,9 @@ class Display : Sample {
   private fun test(display: St7735) {
     println(
       """
-        orientation:    ${display.orientation};
-        width:          ${display.width};
-        height:         ${display.height};
+        orientation:    ${display.orientation}
+        width:          ${display.width}
+        height:         ${display.height}
       """.trimIndent()
     )
 
