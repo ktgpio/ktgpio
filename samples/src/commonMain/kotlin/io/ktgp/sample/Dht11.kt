@@ -20,37 +20,21 @@
  * SOFTWARE.
  */
 
-import io.ktgp.readLine
-import io.ktgp.sample.*
+package io.ktgp.sample
 
-fun main() {
-  val sample = getSample()
-  println("Running $sample...")
-  sample.run()
-}
+import io.ktgp.Gpio
+import io.ktgp.sensor.environment.Dht11
+import io.ktgp.use
+import io.ktgp.util.sleep
 
-private fun getSample(): Sample {
-  val samples = arrayOf(
-    Blink(),
-    Distance(),
-    Dht11(),
-    Dht22(),
-    I2c(),
-    Spi(),
-    Adc(),
-    Lcd(),
-    DigitalTube(),
-    Display(),
-  )
-
-  do {
-    samples.forEachIndexed { index, sample ->
-      println("$index:   $sample")
+class Dht11 : Sample {
+  override fun run() {
+    Gpio().use { gpio ->
+      val dht = Dht11(23, gpio)
+      while (true) {
+        runCatching { dht.measure() }.getOrNull()?.let(::println)
+        sleep(2500)
+      }
     }
-
-    val read = readLine()?.toIntOrNull()
-    if (read != null && read >= 0 && read < samples.size) {
-      return samples[read]
-    }
-  } while (true)
+  }
 }

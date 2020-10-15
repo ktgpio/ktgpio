@@ -29,7 +29,7 @@ import io.ktgp.use
 import io.ktgp.util.sleep
 import kotlin.math.min
 
-public class Dht(private val pin: Int, private val gpio: Gpio, private val dht11: Boolean = true) {
+public abstract class Dht internal constructor(private val pin: Int, private val gpio: Gpio) {
 
   private val hiLevel: ULong = 51U
 
@@ -43,23 +43,16 @@ public class Dht(private val pin: Int, private val gpio: Gpio, private val dht11
       pulsesToBinary(pulses, it * 16, it * 16 + 16)
     }
 
-    val (humidity, temperature) = if (dht11) {
-      binary[0].toInt() to binary[2].toInt()
-    } else {
-      val humidity = ((binary[0] shl 8) or binary[1]) / 10U
-      val sign = if (binary[2] and 0x80U != 0U) -1 else 1
-      val temperature = sign * ((((binary[2] and 0x7FU) shl 8) or binary[3]) / 10U).toInt()
-      humidity.toInt() to temperature
-    }
-
     val checksum = binary.asSequence().take(4).sum()
 
     if (checksum and 0xFFU != binary[4]) {
       error("Checksum validation failed")
     }
 
-    return Reading(temperature, humidity)
+    return getReading(binary)
   }
+
+  protected abstract fun getReading(binary: UIntArray): Reading
 
   private fun pulsesToBinary(pulses: UIntArray, start: Int, end: Int): UInt {
     var binary = 0
@@ -105,5 +98,21 @@ public class Dht(private val pin: Int, private val gpio: Gpio, private val dht11
     }
   }
 
-  public data class Reading internal constructor(val temperature: Int, val humidity: Int)
+  public data class Reading internal constructor(val temperature: Double, val humidity: Double)
+}
+
+public class Dht11(pin: Int, gpio: Gpio) : Dht(pin, gpio) {
+  override fun getReading(binary: UIntArray): Reading {
+    return Reading(binary[2].toDouble(), binary[0].toDouble())
+  }
+}
+
+public class Dht22(pin: Int, gpio: Gpio) : Dht(pin, gpio) {
+  override fun getReading(binary: UIntArray): Reading {
+    val humidity = ((binary[0] shl 8) or binary[1]).toInt() / 10.0
+    val sign = if (binary[2] and 0x80U != 0U) -1 else 1
+    val temperature = sign * ((((binary[2] and 0x7FU) shl 8) or binary[3]).toInt() / 10.0)
+
+    return Reading(temperature, humidity)
+  }
 }

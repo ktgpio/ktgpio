@@ -23,14 +23,14 @@
 package io.ktgp.sample
 
 import io.ktgp.Gpio
-import io.ktgp.sensor.environment.Dht
+import io.ktgp.sensor.environment.Dht22
 import io.ktgp.use
 import io.ktgp.util.sleep
 
-class Dht : Sample {
+class Dht22 : Sample {
   override fun run() {
     Gpio().use { gpio ->
-      val dht = Dht(23, gpio)
+      val dht = Dht22(23, gpio)
       while (true) {
         runCatching { dht.measure() }.getOrNull()?.let(::println)
         sleep(2500)
