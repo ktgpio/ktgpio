@@ -21,7 +21,6 @@
  */
 
 group = "io.ktgp"
-version = "1.0"
 
 ext {
   set("ideaActive", System.getProperty("idea.active") != null)
@@ -39,5 +38,4 @@ buildscript {
 
 subprojects {
   group = "io.ktgp"
-  version = "1.0"
 }
