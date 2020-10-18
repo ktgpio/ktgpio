@@ -2,5 +2,3 @@ headers = gpiod.h
 package = io.ktgp.gpio.native
 compilerOpts = -Iheaders/include/
 linkerOpts = -lgpiod
- linkerOpts.linux_arm64 = -Llib/aarch64-linux-gnu/
- linkerOpts.linux_arm32_hfp = -Llib/arm-linux-gnueabihf/
