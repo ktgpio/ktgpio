@@ -21,4 +21,3 @@
  */
 
 include("core")
-include("samples")

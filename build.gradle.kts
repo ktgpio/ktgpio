@@ -28,6 +28,7 @@ ext {
 
 plugins {
   kotlin("multiplatform") version "1.4.10" apply false
+  `maven-publish`
 }
 
 buildscript {
@@ -36,6 +37,49 @@ buildscript {
   }
 }
 
+val assembleLibs = tasks.register<Zip>("assembleLibs") {
+  archiveFileName.set("libs.zip")
+  destinationDirectory.set(file("build/"))
+  from("lib/")
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("libs") {
+      artifact(assembleLibs) {
+        extension = "zip"
+      }
+      artifactId = "native-libs"
+    }
+  }
+
+  repositories {
+    maven {
+      name = "Bintray"
+      url = uri("https://api.bintray.com/maven/ktgpio/ktgpio/native-libs/;publish=1")
+      credentials {
+        username = System.getenv("BINTRAY_USER")
+        password = System.getenv("BINTRAY_API_KEY")
+      }
+    }
+  }
+}
+
 subprojects {
   group = "io.ktgp"
+
+  apply(plugin="maven-publish")
+
+  publishing {
+    repositories {
+      maven {
+        name = "Bintray"
+        url = uri("https://api.bintray.com/maven/ktgpio/ktgpio/core/;publish=1")
+        credentials {
+          username = System.getenv("BINTRAY_USER")
+          password = System.getenv("BINTRAY_API_KEY")
+        }
+      }
+    }
+  }
 }
