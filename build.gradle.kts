@@ -28,6 +28,7 @@ ext {
 
 plugins {
   kotlin("multiplatform") version "1.4.30" apply false
+  signing
   `maven-publish`
 }
 
@@ -37,12 +38,58 @@ buildscript {
   }
 }
 
+val javadocTask = task<Zip>("javadoc") {
+  from(".")
+  include("README.md")
+  archiveFileName.set("javadoc.jar")
+  destinationDirectory.set(buildDir)
+}
+
 subprojects {
   group = "io.ktgp"
 
   apply(plugin="maven-publish")
+  apply(plugin="signing")
+
+  tasks.named("publish") { dependsOn(javadocTask) }
+  tasks.named("publishToMavenLocal") { dependsOn(javadocTask) }
 
   publishing {
+    publications {
+      all {
+        if (this is MavenPublication) {
+          artifact(javadocTask.outputs.files.singleFile) {
+            classifier = "javadoc"
+            extension = "jar"
+          }
+          pom {
+            name.set("ktgpio")
+            description.set("GPIO on a Raspberry Pi with Kotlin/Native")
+            url.set("https://ktgp.io/")
+            licenses {
+              license {
+                name.set("MIT License")
+                url.set("https://opensource.org/licenses/MIT")
+              }
+            }
+            developers {
+              developer {
+                name.set("Pavel Kakolin")
+                email.set("appr@appr.me")
+                organization.set("ktgpio")
+                organizationUrl.set("https://github.com/ktgpio")
+              }
+            }
+            scm {
+              connection.set("scm:git:https://github.com/ktgpio/ktgpio.git")
+              developerConnection.set("scm:git:ssh://git@github.com:ktgpio/ktgpio.git")
+              url.set("https://github.com/ktgpio/ktgpio/tree/main")
+            }
+          }
+        }
+      }
+    }
+
     repositories {
       maven {
         name = "Bintray"
@@ -52,6 +99,15 @@ subprojects {
           password = System.getenv("BINTRAY_API_KEY")
         }
       }
+    }
+  }
+
+  val signingKey: String? = System.getenv("GPG_KEY")
+  val signingPassword: String? = System.getenv("GPG_PASSWORD")
+  if (signingKey != null && signingPassword != null) {
+    signing {
+      useInMemoryPgpKeys(signingKey, signingPassword)
+      sign(publishing.publications)
     }
   }
 }
