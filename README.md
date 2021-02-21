@@ -40,7 +40,7 @@ Here is a minimal `build.gradle.kts` example:
 
 ```kotlin
 plugins {
-  kotlin("multiplatform") version "1.4.10"
+  kotlin("multiplatform") version "1.4.30"
 }
 
 repositories {
@@ -54,7 +54,7 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("io.ktgp:core:0.0.2")
+        implementation("io.ktgp:core:0.0.4")
         implementation(kotlin("stdlib"))
       }
     }
