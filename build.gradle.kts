@@ -27,7 +27,7 @@ ext {
 }
 
 plugins {
-  kotlin("multiplatform") version "1.4.10" apply false
+  kotlin("multiplatform") version "1.4.30" apply false
   `maven-publish`
 }
 
