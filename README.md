@@ -53,7 +53,7 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation("io.ktgp:core:0.0.5")
+        implementation("io.ktgp:core:0.0.6")
         implementation(kotlin("stdlib"))
       }
     }
