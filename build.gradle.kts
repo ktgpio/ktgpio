@@ -92,11 +92,11 @@ subprojects {
 
     repositories {
       maven {
-        name = "Bintray"
-        url = uri("https://api.bintray.com/maven/ktgpio/ktgpio/core/;publish=1")
+        name = "ossrh"
+        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
         credentials {
-          username = System.getenv("BINTRAY_USER")
-          password = System.getenv("BINTRAY_API_KEY")
+          username = System.getenv("OSSRH_USER")
+          password = System.getenv("OSSRH_PASSWORD")
         }
       }
     }

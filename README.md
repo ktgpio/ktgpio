@@ -44,7 +44,6 @@ plugins {
 }
 
 repositories {
-  maven("https://dl.bintray.com/ktgpio/ktgpio/")
   mavenCentral()
 }
 
