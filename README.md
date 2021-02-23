@@ -1,3 +1,5 @@
+[![build](https://github.com/ktgpio/ktgpio/actions/workflows/build.yml/badge.svg)](https://github.com/ktgpio/ktgpio/actions/workflows/build.yml)
+
 # GPIO on a Raspberry Pi with Kotlin/Native
 
 ## Getting started
