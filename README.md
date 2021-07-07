@@ -12,7 +12,7 @@ and is confirmed to work on
 and [Raspberry Pi OS arm64](https://downloads.raspberrypi.org/raspios_arm64/).
 
 For the list of supported hosts refer to Kotlin/Native
-[release notes](https://github.com/JetBrains/kotlin-native/blob/master/RELEASE_NOTES.md#supported-platforms).
+[release notes](https://github.com/JetBrains/kotlin/blob/master/kotlin-native/RELEASE_NOTES.md#supported-platforms).
 
 ### Target preparation
 
