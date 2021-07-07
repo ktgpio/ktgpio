@@ -102,7 +102,7 @@ public class Hd4478(private val config: Config, private val device: I2cDevice) :
 
   public fun displayString(s: String) {
     s.forEach { char ->
-      write(char.toByte().toUByte(), Rs)
+      write(char.code.toUByte(), Rs)
     }
   }
 

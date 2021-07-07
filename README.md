@@ -42,7 +42,7 @@ Here is a minimal `build.gradle.kts` example:
 
 ```kotlin
 plugins {
-  kotlin("multiplatform") version "1.4.30"
+  kotlin("multiplatform") version "1.5.20"
 }
 
 repositories {

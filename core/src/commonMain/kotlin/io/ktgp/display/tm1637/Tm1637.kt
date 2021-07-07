@@ -122,14 +122,14 @@ public class Tm1637(private val config: Config, gpio: Gpio) : Closeable {
   }
 
   private fun encodeChar(c: Char): UByte {
-    return when (val ord = c.toInt()) {
+    return when (val ord = c.code) {
       32 -> segments[36]
       42 -> segments[38]
       45 -> segments[37]
       in 65..90 -> segments[ord - 55]
       in 97..122 -> segments[ord - 87]
       in 48..57 -> segments[ord - 48]
-      else -> error("Character is out of rang")
+      else -> error("Character is out of range")
     }
   }
 
