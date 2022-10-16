@@ -1,4 +1,5 @@
 [![build](https://github.com/ktgpio/ktgpio/actions/workflows/build.yml/badge.svg)](https://github.com/ktgpio/ktgpio/actions/workflows/build.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.ktgp/core)](https://search.maven.org/artifact/io.ktgp/core)
 
 # GPIO on a Raspberry Pi with Kotlin/Native
 
