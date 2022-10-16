@@ -8,13 +8,17 @@
 #ifndef __LIBGPIOD_GPIOD_H__
 #define __LIBGPIOD_GPIOD_H__
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @file gpiod.h
+ */
 
 /**
  * @mainpage libgpiod public API
@@ -46,7 +50,7 @@ struct gpiod_line_iter;
 struct gpiod_line_bulk;
 
 /**
- * @defgroup __common__ Common helper macros
+ * @defgroup common Common helper macros
  * @{
  *
  * Commonly used utility macros.
@@ -77,12 +81,28 @@ struct gpiod_line_bulk;
 /**
  * @}
  *
- * @defgroup __high_level__ High-level API
+ * @defgroup high_level High-level API
  * @{
  *
  * Simple high-level routines for straightforward GPIO manipulation without
  * the need to use the gpiod_* structures or to keep track of resources.
  */
+
+/**
+ * @brief Miscellaneous GPIO flags.
+ */
+enum {
+	GPIOD_CTXLESS_FLAG_OPEN_DRAIN		= GPIOD_BIT(0),
+	/**< The line is an open-drain port. */
+	GPIOD_CTXLESS_FLAG_OPEN_SOURCE		= GPIOD_BIT(1),
+	/**< The line is an open-source port. */
+	GPIOD_CTXLESS_FLAG_BIAS_DISABLE		= GPIOD_BIT(2),
+	/**< The line has neither either pull-up nor pull-down resistor */
+	GPIOD_CTXLESS_FLAG_BIAS_PULL_DOWN	= GPIOD_BIT(3),
+	/**< The line has pull-down resistor enabled */
+	GPIOD_CTXLESS_FLAG_BIAS_PULL_UP		= GPIOD_BIT(4),
+	/**< The line has pull-up resistor enabled */
+};
 
 /**
  * @brief Read current value from a single GPIO line.
@@ -94,6 +114,19 @@ struct gpiod_line_bulk;
  */
 int gpiod_ctxless_get_value(const char *device, unsigned int offset,
 			    bool active_low, const char *consumer) GPIOD_API;
+
+/**
+ * @brief Read current value from a single GPIO line.
+ * @param device Name, path, number or label of the gpiochip.
+ * @param offset Offset of the GPIO line.
+ * @param active_low The active state of this line - true if low.
+ * @param consumer Name of the consumer.
+ * @param flags The flags for the line.
+ * @return 0 or 1 (GPIO value) if the operation succeeds, -1 on error.
+ */
+int gpiod_ctxless_get_value_ext(const char *device, unsigned int offset,
+				bool active_low, const char *consumer,
+				int flags) GPIOD_API;
 
 /**
  * @brief Read current values from a set of GPIO lines.
@@ -109,6 +142,23 @@ int gpiod_ctxless_get_value_multiple(const char *device,
 				     const unsigned int *offsets, int *values,
 				     unsigned int num_lines, bool active_low,
 				     const char *consumer) GPIOD_API;
+
+/**
+ * @brief Read current values from a set of GPIO lines.
+ * @param device Name, path, number or label of the gpiochip.
+ * @param offsets Array of offsets of lines whose values should be read.
+ * @param values Buffer in which the values will be stored.
+ * @param num_lines Number of lines, must be > 0.
+ * @param active_low The active state of this line - true if low.
+ * @param consumer Name of the consumer.
+ * @param flags The flags for the lines.
+ * @return 0 if the operation succeeds, -1 on error.
+ */
+int gpiod_ctxless_get_value_multiple_ext(const char *device,
+					 const unsigned int *offsets,
+					 int *values, unsigned int num_lines,
+					 bool active_low, const char *consumer,
+					 int flags) GPIOD_API;
 
 /**
  * @brief Simple set value callback signature.
@@ -134,6 +184,26 @@ int gpiod_ctxless_set_value(const char *device, unsigned int offset, int value,
 			    void *data) GPIOD_API;
 
 /**
+ * @brief Set value of a single GPIO line.
+ * @param device Name, path, number or label of the gpiochip.
+ * @param offset The offset of the GPIO line.
+ * @param value New value (0 or 1).
+ * @param active_low The active state of this line - true if low.
+ * @param consumer Name of the consumer.
+ * @param cb Optional callback function that will be called right after setting
+ *           the value. Users can use this, for example, to pause the execution
+ *           after toggling a GPIO.
+ * @param data Optional user data that will be passed to the callback function.
+ * @param flags The flags for the line.
+ * @return 0 if the operation succeeds, -1 on error.
+ */
+int gpiod_ctxless_set_value_ext(const char *device, unsigned int offset,
+				int value, bool active_low,
+				const char *consumer,
+				gpiod_ctxless_set_value_cb cb,
+				void *data, int flags) GPIOD_API;
+
+/**
  * @brief Set values of multiple GPIO lines.
  * @param device Name, path, number or label of the gpiochip.
  * @param offsets Array of offsets of lines the values of which should be set.
@@ -152,6 +222,29 @@ int gpiod_ctxless_set_value_multiple(const char *device,
 				     bool active_low, const char *consumer,
 				     gpiod_ctxless_set_value_cb cb,
 				     void *data) GPIOD_API;
+
+/**
+ * @brief Set values of multiple GPIO lines.
+ * @param device Name, path, number or label of the gpiochip.
+ * @param offsets Array of offsets of lines the values of which should be set.
+ * @param values Array of integers containing new values.
+ * @param num_lines Number of lines, must be > 0.
+ * @param active_low The active state of this line - true if low.
+ * @param consumer Name of the consumer.
+ * @param cb Optional callback function that will be called right after setting
+ *           all values. Works the same as in ::gpiod_ctxless_set_value.
+ * @param data Optional user data that will be passed to the callback function.
+ * @param flags The flags for the lines.
+ * @return 0 if the operation succeeds, -1 on error.
+ */
+int gpiod_ctxless_set_value_multiple_ext(const char *device,
+					 const unsigned int *offsets,
+					 const int *values,
+					 unsigned int num_lines,
+					 bool active_low,
+					 const char *consumer,
+					 gpiod_ctxless_set_value_cb cb,
+					 void *data, int flags) GPIOD_API;
 
 /**
  * @brief Event types that the ctxless event monitor can wait for.
@@ -190,7 +283,7 @@ enum {
 };
 
 /**
- * @brief Simple event callack signature.
+ * @brief Simple event callback signature.
  *
  * The callback function takes the following arguments: event type (int),
  * GPIO line offset (unsigned int), event timestamp (const struct timespec *)
@@ -258,6 +351,9 @@ typedef int (*gpiod_ctxless_event_poll_cb)(unsigned int,
  * @note The way the ctxless event loop works is described in detail in
  *       ::gpiod_ctxless_event_loop_multiple - this is just a wrapper aound
  *       this routine which calls it for a single GPIO line.
+ * @deprecated This function suffers from an issue where HW may not allow
+ *             setting up both rising and falling egde interrupts at the same
+ *             time.
  */
 int gpiod_ctxless_event_loop(const char *device, unsigned int offset,
 			     bool active_low, const char *consumer,
@@ -281,6 +377,9 @@ int gpiod_ctxless_event_loop(const char *device, unsigned int offset,
  * @return 0 no errors were encountered, -1 if an error occurred.
  * @note The poll callback can be NULL in which case the routine will fall
  *       back to a basic, ppoll() based callback.
+ * @deprecated This function suffers from an issue where HW may not allow
+ *             setting up both rising and falling egde interrupts at the same
+ *             time.
  *
  * Internally this routine opens the GPIO chip, requests the set of lines for
  * both-edges events and calls the polling callback in a loop. The role of the
@@ -328,6 +427,31 @@ int gpiod_ctxless_event_monitor(const char *device, int event_type,
 				void *data) GPIOD_API;
 
 /**
+ * @brief Wait for events on a single GPIO line.
+ * @param device Name, path, number or label of the gpiochip.
+ * @param event_type Type of events to listen for.
+ * @param offset GPIO line offset to monitor.
+ * @param active_low The active state of this line - true if low.
+ * @param consumer Name of the consumer.
+ * @param timeout Maximum wait time for each iteration.
+ * @param poll_cb Callback function to call when waiting for events.
+ * @param event_cb Callback function to call for each line event.
+ * @param data User data passed to the callback.
+ * @param flags The flags for the line.
+ * @return 0 if no errors were encountered, -1 if an error occurred.
+ * @note The way the ctxless event loop works is described in detail in
+ *       ::gpiod_ctxless_event_monitor_multiple - this is just a wrapper aound
+ *       this routine which calls it for a single GPIO line.
+ */
+int gpiod_ctxless_event_monitor_ext(const char *device, int event_type,
+				    unsigned int offset, bool active_low,
+				    const char *consumer,
+				    const struct timespec *timeout,
+				    gpiod_ctxless_event_poll_cb poll_cb,
+				    gpiod_ctxless_event_handle_cb event_cb,
+				    void *data, int flags) GPIOD_API;
+
+/**
  * @brief Wait for events on multiple GPIO lines.
  * @param device Name, path, number or label of the gpiochip.
  * @param event_type Type of events to listen for.
@@ -345,7 +469,7 @@ int gpiod_ctxless_event_monitor(const char *device, int event_type,
  *       back to a basic, ppoll() based callback.
  *
  * Internally this routine opens the GPIO chip, requests the set of lines for
- * the type of events specified in the event_type paramter and calls the
+ * the type of events specified in the event_type parameter and calls the
  * polling callback in a loop. The role of the polling callback is to detect
  * input events on a set of file descriptors and notify the caller about the
  * fds ready for reading.
@@ -367,6 +491,47 @@ int gpiod_ctxless_event_monitor_multiple(
 			void *data) GPIOD_API;
 
 /**
+ * @brief Wait for events on multiple GPIO lines.
+ * @param device Name, path, number or label of the gpiochip.
+ * @param event_type Type of events to listen for.
+ * @param offsets Array of GPIO line offsets to monitor.
+ * @param num_lines Number of lines to monitor.
+ * @param active_low The active state of this line - true if low.
+ * @param consumer Name of the consumer.
+ * @param timeout Maximum wait time for each iteration.
+ * @param poll_cb Callback function to call when waiting for events. Can
+ *                be NULL.
+ * @param event_cb Callback function to call on event occurrence.
+ * @param data User data passed to the callback.
+ * @param flags The flags for the lines.
+ * @return 0 no errors were encountered, -1 if an error occurred.
+ * @note The poll callback can be NULL in which case the routine will fall
+ *       back to a basic, ppoll() based callback.
+ *
+ * Internally this routine opens the GPIO chip, requests the set of lines for
+ * the type of events specified in the event_type parameter and calls the
+ * polling callback in a loop. The role of the polling callback is to detect
+ * input events on a set of file descriptors and notify the caller about the
+ * fds ready for reading.
+ *
+ * The ctxless event loop then reads each queued event from marked descriptors
+ * and calls the event callback. Both callbacks can stop the loop at any
+ * point.
+ *
+ * The poll_cb argument can be NULL in which case the function falls back to
+ * a default, ppoll() based callback.
+ */
+int gpiod_ctxless_event_monitor_multiple_ext(
+			const char *device, int event_type,
+			const unsigned int *offsets,
+			unsigned int num_lines, bool active_low,
+			const char *consumer, const struct timespec *timeout,
+			gpiod_ctxless_event_poll_cb poll_cb,
+			gpiod_ctxless_event_handle_cb event_cb,
+			void *data, int flags) GPIOD_API;
+
+
+/**
  * @brief Determine the chip name and line offset of a line with given name.
  * @param name The name of the GPIO line to lookup.
  * @param chipname Buffer in which the name of the GPIO chip will be stored.
@@ -376,6 +541,9 @@ int gpiod_ctxless_event_monitor_multiple(
  *         the line was found. In the first two cases the contents of chipname
  *         and offset remain unchanged.
  * @note The chip name is truncated if the buffer can't hold its entire size.
+ * @attention GPIO line names are not unique in the linux kernel, neither
+ *            globally nor within a single chip. This function finds the first
+ *            line with given name.
  */
 int gpiod_ctxless_find_line(const char *name, char *chipname,
 			    size_t chipname_size,
@@ -384,7 +552,7 @@ int gpiod_ctxless_find_line(const char *name, char *chipname,
 /**
  * @}
  *
- * @defgroup __chips__ GPIO chip operations
+ * @defgroup chips GPIO chip operations
  * @{
  *
  * Functions and data structures dealing with GPIO chips.
@@ -501,6 +669,9 @@ int gpiod_chip_get_all_lines(struct gpiod_chip *chip,
  *         found or an error occurred.
  * @note In case a line with given name is not associated with given chip, the
  *       function sets errno to ENOENT.
+ * @attention GPIO line names are not unique in the linux kernel, neither
+ *            globally nor within a single chip. This function finds the first
+ *            line with given name.
  */
 struct gpiod_line *
 gpiod_chip_find_line(struct gpiod_chip *chip, const char *name) GPIOD_API;
@@ -514,6 +685,9 @@ gpiod_chip_find_line(struct gpiod_chip *chip, const char *name) GPIOD_API;
  * @return 0 if all lines were located, -1 on error.
  * @note If at least one line from the list could not be found among the lines
  *       exposed by this chip, the function sets errno to ENOENT.
+ * @attention GPIO line names are not unique in the linux kernel, neither
+ *            globally nor within a single chip. This function finds the first
+ *            line with given name.
  */
 int gpiod_chip_find_lines(struct gpiod_chip *chip, const char **names,
 			  struct gpiod_line_bulk *bulk) GPIOD_API;
@@ -521,13 +695,16 @@ int gpiod_chip_find_lines(struct gpiod_chip *chip, const char **names,
 /**
  * @}
  *
- * @defgroup __lines__ GPIO line operations
+ * @defgroup lines GPIO line operations
  * @{
  *
  * Functions and data structures dealing with GPIO lines.
  *
- * @defgroup __line_bulk__ Operating on multiple lines
+ * @defgroup line_bulk Operating on multiple lines
  * @{
+ *
+ * Convenience data structures and helper functions for storing and operating
+ * on multiple lines at once.
  */
 
 /**
@@ -623,7 +800,7 @@ gpiod_line_bulk_num_lines(struct gpiod_line_bulk *bulk)
  *
  * This is a variant of ::gpiod_line_bulk_foreach_line which uses an integer
  * variable (either signed or unsigned) to store the loop state. This offset
- * variable is guaranteed to correspond with the offset of the current line in
+ * variable is guaranteed to correspond to the offset of the current line in
  * the bulk->lines array.
  */
 #define gpiod_line_bulk_foreach_line_off(bulk, line, offset)		\
@@ -634,8 +811,11 @@ gpiod_line_bulk_num_lines(struct gpiod_line_bulk *bulk)
 /**
  * @}
  *
- * @defgroup __line_info__ Line info
+ * @defgroup line_info Line info
  * @{
+ *
+ * Definitions and functions for retrieving kernel information about both
+ * requested and free lines.
  */
 
 /**
@@ -656,6 +836,20 @@ enum {
 	/**< The active state of a GPIO is active-high. */
 	GPIOD_LINE_ACTIVE_STATE_LOW,
 	/**< The active state of a GPIO is active-low. */
+};
+
+/**
+ * @brief Possible internal bias settings.
+ */
+enum {
+	GPIOD_LINE_BIAS_AS_IS = 1,
+	/**< The internal bias state is unknown. */
+	GPIOD_LINE_BIAS_DISABLE,
+	/**< The internal bias is disabled. */
+	GPIOD_LINE_BIAS_PULL_UP,
+	/**< The internal pull-up bias is enabled. */
+	GPIOD_LINE_BIAS_PULL_DOWN,
+	/**< The internal pull-down bias is enabled. */
 };
 
 /**
@@ -686,16 +880,24 @@ const char *gpiod_line_consumer(struct gpiod_line *line) GPIOD_API;
 /**
  * @brief Read the GPIO line direction setting.
  * @param line GPIO line object.
- * @return Returns GPIOD_DIRECTION_INPUT or GPIOD_DIRECTION_OUTPUT.
+ * @return Returns GPIOD_LINE_DIRECTION_INPUT or GPIOD_LINE_DIRECTION_OUTPUT.
  */
 int gpiod_line_direction(struct gpiod_line *line) GPIOD_API;
 
 /**
  * @brief Read the GPIO line active state setting.
  * @param line GPIO line object.
- * @return Returns GPIOD_ACTIVE_STATE_HIGH or GPIOD_ACTIVE_STATE_LOW.
+ * @return Returns GPIOD_LINE_ACTIVE_STATE_HIGH or GPIOD_LINE_ACTIVE_STATE_LOW.
  */
 int gpiod_line_active_state(struct gpiod_line *line) GPIOD_API;
+
+/**
+ * @brief Read the GPIO line bias setting.
+ * @param line GPIO line object.
+ * @return Returns GPIOD_LINE_BIAS_PULL_UP, GPIOD_LINE_BIAS_PULL_DOWN,
+ *         GPIOD_LINE_BIAS_DISABLE or GPIOD_LINE_BIAS_AS_IS.
+ */
+int gpiod_line_bias(struct gpiod_line *line) GPIOD_API;
 
 /**
  * @brief Check if the line is currently in use.
@@ -725,35 +927,43 @@ bool gpiod_line_is_open_source(struct gpiod_line *line) GPIOD_API;
 /**
  * @brief Re-read the line info.
  * @param line GPIO line object.
- * @return 0 is the operation succeeds. In case of an error this routine
+ * @return 0 if the operation succeeds. In case of an error this routine
  *         returns -1 and sets the last error number.
  *
  * The line info is initially retrieved from the kernel by
- * gpiod_chip_get_line(). Users can use this line to manually re-read the line
- * info.
+ * gpiod_chip_get_line() and is later re-read after every successful request.
+ * Users can use this function to manually re-read the line info when needed.
+ *
+ * We currently have no mechanism provided by the kernel for keeping the line
+ * info synchronized and for the sake of speed and simplicity of this low-level
+ * library we don't want to re-read the line info automatically everytime
+ * a property is retrieved. Any daemon using this library must track the state
+ * of lines on its own and call this routine if needed.
+ *
+ * The state of requested lines is kept synchronized (or rather cannot be
+ * changed by external agents while the ownership of the line is taken) so
+ * there's no need to call this function in that case.
  */
 int gpiod_line_update(struct gpiod_line *line) GPIOD_API;
 
 /**
  * @brief Check if the line info needs to be updated.
  * @param line GPIO line object.
- * @return Returns false if the line is up-to-date. True otherwise.
- *
- * The line is updated by calling gpiod_line_update() from within
- * gpiod_chip_get_line() and on every line request/release. However: an error
- * returned from gpiod_line_update() only breaks the execution of the former.
- * The request/release routines only set the internal up-to-date flag to false
- * and continue their execution. This routine allows to check if a line info
- * update failed at some point and we should call gpiod_line_update()
- * explicitly.
+ * @return Always returns false.
+ * @deprecated This mechanism no longer exists in the library and this function
+ *             does nothing.
  */
-bool gpiod_line_needs_update(struct gpiod_line *line) GPIOD_API;
+bool
+gpiod_line_needs_update(struct gpiod_line *line) GPIOD_API GPIOD_DEPRECATED;
 
 /**
  * @}
  *
- * @defgroup __line_request__ Line requests
+ * @defgroup line_request Line requests
  * @{
+ *
+ * Interface for requesting GPIO lines from userspace for both values and
+ * events.
  */
 
 /**
@@ -767,11 +977,11 @@ enum {
 	GPIOD_LINE_REQUEST_DIRECTION_OUTPUT,
 	/**< Request the line(s) for setting the GPIO line state. */
 	GPIOD_LINE_REQUEST_EVENT_FALLING_EDGE,
-	/**< Monitor both types of events. */
+	/**< Only watch falling edge events. */
 	GPIOD_LINE_REQUEST_EVENT_RISING_EDGE,
 	/**< Only watch rising edge events. */
 	GPIOD_LINE_REQUEST_EVENT_BOTH_EDGES,
-	/**< Only watch falling edge events. */
+	/**< Monitor both types of events. */
 };
 
 /**
@@ -784,6 +994,12 @@ enum {
 	/**< The line is an open-source port. */
 	GPIOD_LINE_REQUEST_FLAG_ACTIVE_LOW	= GPIOD_BIT(2),
 	/**< The active state of the line is low (high is the default). */
+	GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE	= GPIOD_BIT(3),
+	/**< The line has neither either pull-up nor pull-down resistor. */
+	GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN	= GPIOD_BIT(4),
+	/**< The line has pull-down resistor enabled. */
+	GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP	= GPIOD_BIT(5),
+	/**< The line has pull-up resistor enabled. */
 };
 
 /**
@@ -1071,8 +1287,11 @@ bool gpiod_line_is_free(struct gpiod_line *line) GPIOD_API;
 /**
  * @}
  *
- * @defgroup __line_value__ Reading & setting line values
+ * @defgroup line_value Reading & setting line values
  * @{
+ *
+ * Functions allowing to read and set GPIO line values for single lines and
+ * in bulk.
  */
 
 /**
@@ -1110,6 +1329,7 @@ int gpiod_line_set_value(struct gpiod_line *line, int value) GPIOD_API;
  * @brief Set the values of a set of GPIO lines.
  * @param bulk Set of GPIO lines to reserve.
  * @param values An array holding line_bulk->num_lines new values for lines.
+ *               A NULL pointer is interpreted as a logical low for all lines.
  * @return 0 is the operation succeeds. In case of an error this routine
  *         returns -1 and sets the last error number.
  *
@@ -1122,8 +1342,129 @@ int gpiod_line_set_value_bulk(struct gpiod_line_bulk *bulk,
 /**
  * @}
  *
- * @defgroup __line_event__ Line events handling
+ * @defgroup line_config Setting line configuration
  * @{
+ *
+ * Functions allowing modification of config options of GPIO lines requested
+ * from user-space.
+ */
+
+/**
+ * @brief Update the configuration of a single GPIO line.
+ * @param line GPIO line object.
+ * @param direction Updated direction which may be one of
+ *                  GPIOD_LINE_REQUEST_DIRECTION_AS_IS,
+ *                  GPIOD_LINE_REQUEST_DIRECTION_INPUT, or
+ *                  GPIOD_LINE_REQUEST_DIRECTION_OUTPUT.
+ * @param flags Replacement flags.
+ * @param value The new output value for the line when direction is
+ *              GPIOD_LINE_REQUEST_DIRECTION_OUTPUT.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ */
+int gpiod_line_set_config(struct gpiod_line *line, int direction,
+			  int flags, int value) GPIOD_API;
+
+/**
+ * @brief Update the configuration of a set of GPIO lines.
+ * @param bulk Set of GPIO lines.
+ * @param direction Updated direction which may be one of
+ *                  GPIOD_LINE_REQUEST_DIRECTION_AS_IS,
+ *                  GPIOD_LINE_REQUEST_DIRECTION_INPUT, or
+ *                  GPIOD_LINE_REQUEST_DIRECTION_OUTPUT.
+ * @param flags Replacement flags.
+ * @param values An array holding line_bulk->num_lines new logical values
+ *               for lines when direction is
+ *               GPIOD_LINE_REQUEST_DIRECTION_OUTPUT.
+ *               A NULL pointer is interpreted as a logical low for all lines.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ *
+ * If the lines were not previously requested together, the behavior is
+ * undefined.
+ */
+int gpiod_line_set_config_bulk(struct gpiod_line_bulk *bulk,
+			       int direction, int flags,
+			       const int *values) GPIOD_API;
+
+
+/**
+ * @brief Update the configuration flags of a single GPIO line.
+ * @param line GPIO line object.
+ * @param flags Replacement flags.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ */
+int gpiod_line_set_flags(struct gpiod_line *line, int flags) GPIOD_API;
+
+/**
+ * @brief Update the configuration flags of a set of GPIO lines.
+ * @param bulk Set of GPIO lines.
+ * @param flags Replacement flags.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ *
+ * If the lines were not previously requested together, the behavior is
+ * undefined.
+ */
+int gpiod_line_set_flags_bulk(struct gpiod_line_bulk *bulk,
+			      int flags) GPIOD_API;
+
+/**
+ * @brief Set the direction of a single GPIO line to input.
+ * @param line GPIO line object.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ */
+int gpiod_line_set_direction_input(struct gpiod_line *line) GPIOD_API;
+
+/**
+ * @brief Set the direction of a set of GPIO lines to input.
+ * @param bulk Set of GPIO lines.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ *
+ * If the lines were not previously requested together, the behavior is
+ * undefined.
+ */
+int
+gpiod_line_set_direction_input_bulk(struct gpiod_line_bulk *bulk) GPIOD_API;
+
+/**
+ * @brief Set the direction of a single GPIO line to output.
+ * @param line GPIO line object.
+ * @param value The logical value output on the line.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ */
+int gpiod_line_set_direction_output(struct gpiod_line *line,
+				    int value) GPIOD_API;
+
+/**
+ * @brief Set the direction of a set of GPIO lines to output.
+ * @param bulk Set of GPIO lines.
+ * @param values An array holding line_bulk->num_lines new logical values
+ *               for lines.  A NULL pointer is interpreted as a logical low
+ *               for all lines.
+ * @return 0 is the operation succeeds. In case of an error this routine
+ *         returns -1 and sets the last error number.
+ *
+ * If the lines were not previously requested together, the behavior is
+ * undefined.
+ */
+int gpiod_line_set_direction_output_bulk(struct gpiod_line_bulk *bulk,
+					 const int *values) GPIOD_API;
+
+/**
+ * @}
+ *
+ * @defgroup line_event Line events handling
+ * @{
+ *
+ * Structures and functions allowing to poll lines for events and read them,
+ * both for individual lines as well as in bulk. Also contains functions for
+ * retrieving the associated file descriptors and operate on them for easy
+ * integration with standard unix interfaces.
  */
 
 /**
@@ -1170,7 +1511,7 @@ int gpiod_line_event_wait_bulk(struct gpiod_line_bulk *bulk,
 			       struct gpiod_line_bulk *event_bulk) GPIOD_API;
 
 /**
- * @brief Read the last event from the GPIO line.
+ * @brief Read next pending event from the GPIO line.
  * @param line GPIO line object.
  * @param event Buffer to which the event data will be copied.
  * @return 0 if the event was read correctly, -1 on error.
@@ -1178,6 +1519,19 @@ int gpiod_line_event_wait_bulk(struct gpiod_line_bulk *bulk,
  */
 int gpiod_line_event_read(struct gpiod_line *line,
 			  struct gpiod_line_event *event) GPIOD_API;
+
+/**
+ * @brief Read up to a certain number of events from the GPIO line.
+ * @param line GPIO line object.
+ * @param events Buffer to which the event data will be copied. Must hold at
+ *               least the amount of events specified in num_events.
+ * @param num_events Specifies how many events can be stored in the buffer.
+ * @return On success returns the number of events stored in the buffer, on
+ *         failure -1 is returned.
+ */
+int gpiod_line_event_read_multiple(struct gpiod_line *line,
+				   struct gpiod_line_event *events,
+				   unsigned int num_events) GPIOD_API;
 
 /**
  * @brief Get the event file descriptor.
@@ -1204,10 +1558,24 @@ int gpiod_line_event_get_fd(struct gpiod_line *line) GPIOD_API;
 int gpiod_line_event_read_fd(int fd, struct gpiod_line_event *event) GPIOD_API;
 
 /**
+ * @brief Read up to a certain number of events directly from a file descriptor.
+ * @param fd File descriptor.
+ * @param events Buffer to which the event data will be copied. Must hold at
+ *               least the amount of events specified in num_events.
+ * @param num_events Specifies how many events can be stored in the buffer.
+ * @return On success returns the number of events stored in the buffer, on
+ *         failure -1 is returned.
+ */
+int gpiod_line_event_read_fd_multiple(int fd, struct gpiod_line_event *events,
+				      unsigned int num_events) GPIOD_API;
+
+/**
  * @}
  *
- * @defgroup __line_misc__ Misc line functions
+ * @defgroup line_misc Misc line functions
  * @{
+ *
+ * Functions that didn't fit anywhere else.
  */
 
 /**
@@ -1230,6 +1598,9 @@ gpiod_line_get(const char *device, unsigned int offset) GPIOD_API;
  * @param name Name of the GPIO line.
  * @return Returns the GPIO line handle if the line exists in the system or
  *         NULL if it couldn't be located or an error occurred.
+ * @attention GPIO lines are not unique in the linux kernel, neither globally
+ *            nor within a single chip. This function finds the first line with
+ *            given name.
  *
  * If this routine succeeds, the user must manually close the GPIO chip owning
  * this line to avoid memory leaks. If the line could not be found, this
@@ -1257,7 +1628,7 @@ struct gpiod_chip *gpiod_line_get_chip(struct gpiod_line *line) GPIOD_API;
  *
  * @}
  *
- * @defgroup __iterators__ Iterators for GPIO chips and lines
+ * @defgroup iterators Iterators for GPIO chips and lines
  * @{
  *
  * These functions and data structures allow easy iterating over GPIO
@@ -1381,7 +1752,7 @@ gpiod_line_iter_next(struct gpiod_line_iter *iter) GPIOD_API;
 /**
  * @}
  *
- * @defgroup __misc__ Stuff that didn't fit anywhere else
+ * @defgroup misc Stuff that didn't fit anywhere else
  * @{
  *
  * Various libgpiod-related functions.

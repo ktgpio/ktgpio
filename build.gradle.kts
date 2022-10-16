@@ -27,14 +27,14 @@ ext {
 }
 
 plugins {
-  kotlin("multiplatform") version "1.5.30" apply false
+  kotlin("multiplatform") version "1.7.20" apply false
   signing
   `maven-publish`
 }
 
 buildscript {
   dependencies {
-    classpath("org.jmailen.gradle:kotlinter-gradle:3.5.1")
+    classpath("org.jmailen.gradle:kotlinter-gradle:3.12.0")
   }
 }
 
@@ -110,4 +110,6 @@ subprojects {
       sign(publishing.publications)
     }
   }
+
+
 }

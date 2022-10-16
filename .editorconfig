@@ -2,5 +2,5 @@
 max_line_length = 140
 indent_size = 2
 insert_final_newline = true
-disabled_rules = no-wildcard-imports
+ktlint_disabled_rules = no-wildcard-imports,trailing-comma-on-call-site,trailing-comma-on-declaration-site
 ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^

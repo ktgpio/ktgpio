@@ -21,3 +21,9 @@
  */
 
 include("core")
+
+dependencyResolutionManagement {
+  repositories {
+    mavenCentral()
+  }
+}

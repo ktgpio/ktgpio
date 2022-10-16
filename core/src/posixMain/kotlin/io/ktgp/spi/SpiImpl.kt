@@ -161,7 +161,7 @@ internal class SpiImpl(device: String) : Spi {
         }
       }
 
-      if (mode.toInt() and SPI_CS_HIGH != 0) {
+      if (mode and SPI_CS_HIGH.toUByte() != 0.toUByte()) {
         if (read(file, rxBuf, 0) < 0) {
           error("SPI transaction failed")
         }
